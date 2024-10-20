@@ -2,11 +2,10 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
-use std::vec::*;
+// use std::vec::*;
 
 #[derive(Debug)]
 struct Node<T> {
@@ -69,15 +68,43 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+    pub fn merge(list_a: LinkedList<T>, list_b: LinkedList<T>) -> Self
+    where
+        T: PartialOrd + Clone,
+    {
+        let mut merged_list = LinkedList::default();
+
+        let mut current_a = list_a.start;
+        let mut current_b = list_b.start;
+
+        while current_a.is_some() || current_b.is_some() {
+            let value_a = current_a.map(|node| unsafe { node.as_ref().val.clone() });
+            let value_b = current_b.map(|node| unsafe { node.as_ref().val.clone() });
+
+            match (value_a, value_b) {
+                (Some(a_val), Some(b_val)) => {
+                    if a_val < b_val {
+                        merged_list.add(a_val);
+                        current_a = unsafe { (*current_a.unwrap().as_ptr()).next };
+                    } else {
+                        merged_list.add(b_val);
+                        current_b = unsafe { (*current_b.unwrap().as_ptr()).next };
+                    }
+                }
+                (Some(a_val), None) => {
+                    merged_list.add(a_val);
+                    current_a = unsafe { (*current_a.unwrap().as_ptr()).next };
+                }
+                (None, Some(b_val)) => {
+                    merged_list.add(b_val);
+                    current_b = unsafe { (*current_b.unwrap().as_ptr()).next };
+                }
+                (None, None) => break,
+            }
         }
-	}
+
+        merged_list
+    }
 }
 
 impl<T> Display for LinkedList<T>
