@@ -48,15 +48,19 @@ impl From<&str> for Person {
 
         let parts: Vec<&str> = s.split(',').collect();
 
-        let name = parts.get(0).unwrap_or(&"").to_string();
+        if parts.len() != 2 {
+            return Person::default();
+        }
+
+        let name = parts[0].trim().to_string();
 
         if name.is_empty() {
             return Person::default();
         }
 
-        let age = match parts.get(1) {
-            Some(age_str) => age_str.parse::<usize>().unwrap_or_default(),
-            None => 0,
+        let age = match parts[1].trim().parse::<usize>() {
+            Ok(age) => age,
+            Err(_) => return Person::default(),
         };
 
         Person { name, age }
